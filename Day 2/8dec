@@ -1,0 +1,61 @@
+#Ansible script
+
+---
+-name: install and start Nginx
+  hosts: all
+  become: yes
+
+  tasks:
+    -name: Install nginx server
+     yum:
+        name: nginx
+        state: present
+
+-name: start nginx server
+ service:
+    name: nginx
+    state: started
+    enabled: yes
+
+
+
+#Terraform code
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+resource "aws_instance" "InterviewEC2" {
+  ami           = "ami-123456789"
+  instance_type = "c5.xlarge"
+
+  tags = {
+    Name        = "Server"
+    Environment = "prod"
+    Owner       = "HCL_05"
+  }
+}
+
+
+
+#Kubernetes code
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: Interview
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: server-app
+  template:
+    metadata:
+      labels:
+        app: server-app
+    spec:
+      containers:
+        -name: app
+         image: nginx
+         ports:
+            - containerPort: 80
